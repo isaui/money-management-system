@@ -16,6 +16,7 @@ const TextField : React.FC<ITextField> = ({textfieldKey,  isNumber,value , icon 
         type= {isNumber? "number": isPassword? "password" : "text"}
         readOnly={readonly}
         placeholder={placeholder}
+        step={"1"}
         className="border border-neutral-700 rounded-md w-full text-white pr-3 py-3 mt-1 pl-12 bg-neutral-900"
         ref={inputRef}
         onChange={(e)=> onChangeValue(e.target.value)}

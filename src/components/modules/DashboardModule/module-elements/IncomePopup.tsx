@@ -7,19 +7,30 @@ import TextArea from "@/components/elements/TextArea";
 import { FaMoneyBillTransfer, FaRupiahSign } from "react-icons/fa6";
 import UploadImage from "@/components/elements/UploadImage";
 import { toast } from "react-toastify";
+import { convertToHHmmss, convertToYYYYMMDD } from "@/utilities/TimeFormatter";
+import { handleDateChange } from "@/utilities/modifyDate";
+import { handleTimeChange } from "@/utilities/modifyTime";
+import { useAuth } from "@/components/contexts/AuthContext";
+import axios from "axios";
 
 const IncomePopup: React.FC<ITransactionPopup> = ({onCancel, onSuccess, title, transaction}) => {
     const [isFirstSection, setIsFirstSection] = useState<boolean>(true)
+    const {user} = useAuth()
     const [image, setImage] = useState<string>('')
     const addPopupRef = useRef<HTMLDivElement>(null)
     const incomeTitleRef = useRef<string>('')
     const incomeAmountRef = useRef<string>('')
     const incomeNoteRef = useRef<string>('')
+    const [transactionTime, setTransactionTime] = useState<Date>(new Date());
     const [render, setRender] = useState<boolean>(false)
+    const [agreed, setAgreed] = useState<boolean>(true);
 
     const renderLayer = () => {
         setRender(prevState => !prevState);
     };
+    const handleAgreementChange = () => {
+        setAgreed(!agreed);
+      };
 
     useEffect(()=>{
         if(transaction){
@@ -29,12 +40,15 @@ const IncomePopup: React.FC<ITransactionPopup> = ({onCancel, onSuccess, title, t
             if(transaction.imageUrl){
                 setImage(transaction.imageUrl)
             }
+            setTransactionTime(transaction.time)
         }
         else{
             incomeTitleRef.current = ''
             incomeAmountRef.current = ''
             incomeNoteRef.current = ''
             setImage('')
+            setTransactionTime(new Date())
+            setAgreed(true)
         }
     },[render])
     
@@ -70,7 +84,34 @@ const IncomePopup: React.FC<ITransactionPopup> = ({onCancel, onSuccess, title, t
     }
     const addIncome = async () => {
         if(validate()){
-
+            if(!transaction){
+                toast('Menambahkan Income...')
+                const queryString = 
+                `
+                DO $$
+                DECLARE 
+                    new_balance BIGINT;
+                BEGIN
+                    -- Mendapatkan balance terbaru
+                    SELECT amount INTO new_balance FROM balance WHERE user_id = '${user?.userId}' ORDER BY transaction_time DESC LIMIT 1 FOR UPDATE;
+                    
+                    -- Menambahkan income baru
+                    INSERT INTO income (user_id, income_name, income_thumbnail, income_amount, income_information, transaction_time, is_affecting)
+                    VALUES ('${user?.userId}', '${incomeTitleRef.current}', '${image}', ${incomeAmountRef.current}, '${incomeNoteRef.current}', '${transactionTime.toISOString()}', ${agreed});
+                    
+                    -- Menambahkan balance baru
+                    INSERT INTO balance (user_id, amount, transaction_time)
+                    VALUES ('${user?.userId}', new_balance + ${incomeAmountRef.current}, '${transactionTime.toISOString()}');
+                END;
+                $$;
+                `
+                await axios.post('/api/query', {queryString:queryString})
+                toast('Berhasil menambahkan income')
+            }
+            else{
+                toast('Memperbarui Income...')
+                
+            }
             onSuccess()
         }
         
@@ -100,6 +141,10 @@ const IncomePopup: React.FC<ITransactionPopup> = ({onCancel, onSuccess, title, t
                 <TextArea textfieldKey={"Additional Note"} onChangeValue={function (text: string): void {
                     incomeNoteRef.current = text
             } } value={incomeNoteRef.current} readonly={false} placeholder="Tuliskan note tambahan" />
+                {!transaction && <label className="mb-2">
+            <input type="checkbox" checked={agreed} onChange={handleAgreementChange} />
+            Saya setuju bahwa data ini akan mempengaruhi saldo saya.
+        </label>}
            </div>
         }
         
@@ -109,6 +154,20 @@ const IncomePopup: React.FC<ITransactionPopup> = ({onCancel, onSuccess, title, t
                 <UploadImage onSuccess={(url : string)=>{
                     setImage(url)
                 }} initialFile={image}/>
+                <div className="grid grid-cols-1 md:grid-cols-2 mt-4 gap-2">
+                    <div className="w-full">
+                    <h1 className="text-white mb-2 text-sm">Tanggal</h1>
+                    <input value={convertToYYYYMMDD(transactionTime)} onChange={(e)=>{
+                        setTransactionTime(handleDateChange(transactionTime, e))
+                    }}  className="w-full text-white rounded-md p-2 mb-2 bg-blue-900" type="date"/>
+                    </div>
+                    <div className="w-full ">
+                        <h1 className="text-white mb-2 text-sm">Waktu</h1>
+                        <input value={convertToHHmmss(transactionTime)} onChange={(e)=>{
+                            setTransactionTime(handleTimeChange(transactionTime,e))
+                        }} className="w-full text-white rounded-md p-2 mb-2 bg-blue-900" type="time"/>
+                        </div>
+                </div>
             </div>
         }
         

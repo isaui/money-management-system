@@ -6,10 +6,14 @@ import TextField from "@/components/elements/TextField";
 import {  FaRupiahSign } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { IBalancePopup } from "../interface/IBalancePopup";
+import { useAuth } from "@/components/contexts/AuthContext";
+import axios from "axios";
+import generateTimestampISO8601WIB from "@/utilities/generateTimestamp";
+
 
 const BalancePopup: React.FC<IBalancePopup> = ({onCancel, onSuccess, title, currentBalance}) => {
-    console.log(currentBalance)
     const addPopupRef = useRef<HTMLDivElement>(null)
+    const {user} = useAuth()
     const balancePreviousAmountRef = useRef<string>(currentBalance)
     const balanceAfterAmountRef = useRef<string>('')
     const [render, setRender] = useState<boolean>(false)
@@ -17,6 +21,8 @@ const BalancePopup: React.FC<IBalancePopup> = ({onCancel, onSuccess, title, curr
     const renderLayer = () => {
         setRender(prevState => !prevState);
     };
+
+    
 
     useEffect(()=>{
         balancePreviousAmountRef.current = currentBalance
@@ -50,7 +56,19 @@ const BalancePopup: React.FC<IBalancePopup> = ({onCancel, onSuccess, title, curr
     }
     const updateBalance = async () => {
         if(validate()){
-
+            const queryString = `
+                    UPDATE INCOME
+                    SET is_affecting = false WHERE user_id = '${user?.userId}';
+                    
+                    UPDATE EXPENSE
+                    SET is_affecting = false WHERE user_id = '${user?.userId}';
+                    
+                    INSERT INTO BALANCE (user_id, amount, transaction_time, related_update)
+                    VALUES ('${user?.userId}', '${balanceAfterAmountRef.current}', '${generateTimestampISO8601WIB()}', FALSE);
+                    `;
+            await axios.post('/api/query',{
+                queryString: queryString
+            })
             onSuccess()
         }
         
@@ -84,18 +102,12 @@ const BalancePopup: React.FC<IBalancePopup> = ({onCancel, onSuccess, title, curr
      
         
         <div className="mt-auto flex text-center justify-center space-x-6 ">
-                <button onClick={()=>{
-                    cancelInput()
-                }} className="px-4 py-2 auth-popup-btn w-full rounded-2xl">CANCEL</button> 
-                <button onClick={()=>{
-                    updateBalance()
-                }} className="px-4 py-2 auth-popup-btn w-full rounded-2xl">UPDATE</button>
+                <button onClick={cancelInput} className="px-4 py-2 auth-popup-btn w-full rounded-2xl">CANCEL</button> 
+                <button onClick={updateBalance} className="px-4 py-2 auth-popup-btn w-full rounded-2xl">UPDATE</button>
             </div>
     </div>
     <div className="ml-auto mt-2 mr-2">
-        <button onClick={()=>{
-            cancelInput()
-        }} className="text-2xl ml-auto"><IoCloseCircle/></button>
+        <button onClick={cancelInput} className="text-2xl ml-auto"><IoCloseCircle/></button>
     </div>
 </Stack>
 }

@@ -5,4 +5,5 @@ export interface ITransaction{
     note: string
     price: string
     time: Date
+    isAffectingBalance?: boolean
 }

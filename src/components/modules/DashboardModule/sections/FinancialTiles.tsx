@@ -7,12 +7,15 @@ import IncomePopup from "../module-elements/IncomePopup"
 import OutcomePopup from "../module-elements/OutcomePopup"
 import BalancePopup from "../module-elements/BalancePopup"
 import { IBalance } from "../interface/IBalance"
+import { IFinancialTiles } from "../interface/IFinancialTiles"
+import {calculateTransaction } from "@/utilities/calculateTransaction"
 
 
-const FinancialTiles : React.FC<{currentBalance:IBalance|null}> = ({currentBalance}) => {
+const FinancialTiles : React.FC<IFinancialTiles> = ({currentBalance, onFetchCallBack, incomeTotal, outcomeTotal}) => {
     const [isIncomePopupOpen, setIncomePopupOpen] = useState<boolean>(false)
     const [isOutcomePopupOpen, setOutcomePopupOpen] = useState<boolean>(false)
     const [isBalancePopupOpen, setIsBalancePopupOpen] = useState<boolean>(false)
+
     const openIncomePopup = () => {
         setIncomePopupOpen(true)
     }
@@ -26,17 +29,25 @@ const FinancialTiles : React.FC<{currentBalance:IBalance|null}> = ({currentBalan
         <div className={` fixed z-30 top-1/2  -translate-y-1/2 transform transition-transform duration-300 ease-in-out ${
                     isIncomePopupOpen ? 'left-1/2 -translate-x-1/2' : 'right-0 translate-x-full'
             }`}>
-                <IncomePopup title="Tambah Income" onCancel={()=>{setIncomePopupOpen(false)}} onSuccess={()=>{setIncomePopupOpen(false)}}/>
+                <IncomePopup title="Tambah Income" onCancel={()=>{setIncomePopupOpen(false)}} onSuccess={()=>{
+                    setIncomePopupOpen(false)
+                    onFetchCallBack()
+                    }}/>
         </div>
         <div className={` fixed z-30 top-1/2  -translate-y-1/2 transform transition-transform duration-300 ease-in-out ${
                     isOutcomePopupOpen ? 'left-1/2 -translate-x-1/2' : 'right-0 translate-x-full'
             }`}>
-                <OutcomePopup title="Tambah Outcome" onCancel={()=>{setOutcomePopupOpen(false)}} onSuccess={()=>{setOutcomePopupOpen(false)}}/>
+                <OutcomePopup title="Tambah Outcome" onCancel={()=>{setOutcomePopupOpen(false)}} onSuccess={()=>{
+                    setOutcomePopupOpen(false)
+                    onFetchCallBack()}}/>
         </div>
         <div className={` fixed z-30 top-1/2  -translate-y-1/2 transform transition-transform duration-300 ease-in-out ${
                     isBalancePopupOpen ? 'left-1/2 -translate-x-1/2' : 'right-0 translate-x-full'
             }`}>
-                <BalancePopup currentBalance={currentBalance? currentBalance.amount : '-'} title="Perbarui Balance" onCancel={()=>{setIsBalancePopupOpen(false)}} onSuccess={()=>{setIsBalancePopupOpen(false)}}/>
+                <BalancePopup currentBalance={currentBalance? currentBalance.amount : '-'} title="Perbarui Balance" onCancel={()=>{setIsBalancePopupOpen(false)}} onSuccess={()=>{
+                    setIsBalancePopupOpen(false)
+                    onFetchCallBack()
+                    }}/>
         </div>
         <div className="grid grid-cols-2 xl:grid-cols-3 w-full gap-x-4 gap-y-4">
         <Stack className="min-h-32  overflow-hidden col-span-2 xl:col-span-1 bg-indigo-800 rounded-xl p-4 linear-gradient-dark-blue border-2 border-blue-400">
@@ -70,7 +81,7 @@ const FinancialTiles : React.FC<{currentBalance:IBalance|null}> = ({currentBalan
                 </div>
             </div>
             <div className="ml-0 mb-2">
-                <h1 className="text-center text-xl md:text-4xl font-bold">Rp 250.000</h1>
+                <h1 className="text-center text-xl md:text-4xl font-bold">Rp{incomeTotal}</h1>
             </div>
             <div className="mt-auto flex md:hidden items-center justify-start w-full ">
                     <button onClick={openIncomePopup} className="text-xs hover:bg-blue-800 text-center mr-2 rounded-md px-2 py-1 border-2 border-white text-white">Add</button>
@@ -92,7 +103,7 @@ const FinancialTiles : React.FC<{currentBalance:IBalance|null}> = ({currentBalan
                 </div>
             </div>
             <div className="ml-0 mb-2">
-                <h1 className="text-center text-xl md:text-4xl font-bold">Rp 250.000</h1>
+                <h1 className="text-center text-xl md:text-4xl font-bold">Rp{outcomeTotal}</h1>
             </div>
             <div className="mt-auto flex md:hidden items-center justify-start w-full ">
                     <button onClick={openOutcomePopup} className="text-xs hover:bg-blue-800 text-center mr-2 rounded-md px-2 py-1 border-2 border-white text-white">Add</button>

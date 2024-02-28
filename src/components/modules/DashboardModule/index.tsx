@@ -8,16 +8,77 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { useAuth } from "@/components/contexts/AuthContext"
 import { IBalance } from "./interface/IBalance"
+import { ITransaction } from "./interface/ITransaction"
+import { calculateTransaction } from "@/utilities/calculateTransaction"
 
 const DashboardModule = () =>{
     const {user} = useAuth();
     const [currentBalance, setCurrentBalance] = useState<IBalance | null>(null)
     const [balanceHistory, setBalanceHistory] = useState<IBalance[]>([])
+    const [incomeTransactions, setIncomeTransactions] = useState<ITransaction[]>([])
+    const [outComeTransactions, setOutcomeTransactions] = useState<ITransaction[]>([])
+    const [needfetch, setNeedFetch] = useState<boolean>(false)
     useEffect(()=>{
         if(user){
-            fetchBalance()
+           fetchAll()
         }
-    },[user])
+    },[user, needfetch])
+
+
+    const refreshBackend = () => {
+        setNeedFetch(prev=> !prev)
+    }
+
+    const fetchAll = async () => {
+      Promise.all([fetchBalance(),
+        fetchIncome(),
+        fetchOutcome()])
+    }
+
+    const fetchIncome = async () => {
+        const transactions: ITransaction[] = []
+        const res = await axios.post('/api/query',{
+            queryString:`SELECT * FROM INCOME WHERE user_id ='${user?.userId}' ORDER BY transaction_time DESC;`
+        })
+        console.log(res)
+        const rows = res.data.result.rows
+        rows.forEach((entry:any) => {
+            const transaction: ITransaction = {
+                label: "Income",
+                title: entry.income_name,
+                imageUrl: entry.income_thumbnail,
+                note: entry.income_information,
+                price: entry.income_amount,
+                time: new Date(entry.transaction_time),
+                isAffectingBalance: entry.is_affecting
+            }
+            transactions.push(transaction)
+        });
+      setIncomeTransactions(transactions)
+
+    }
+
+    const fetchOutcome = async  () => {
+        const transactions: ITransaction[] = []
+        const res = await axios.post('/api/query',{
+            queryString:`SELECT * FROM EXPENSE WHERE user_id ='${user?.userId}' ORDER BY transaction_time DESC;`
+        })
+        console.log(res)
+        const rows = res.data.result.rows
+        rows.forEach((entry:any) => {
+            const transaction: ITransaction = {
+                label: "Outcome",
+                title: entry.expense_name,
+                imageUrl: entry.expense_thumbnail,
+                note: entry.expense_information,
+                price: entry.expense_amount,
+                time: new Date(entry.transaction_time),
+                isAffectingBalance: entry.is_affecting
+            }
+            transactions.push(transaction)
+        });
+      setOutcomeTransactions(transactions)
+    }
 
     const fetchBalance = async () => {
         const res = await axios.post('/api/query',{
@@ -45,7 +106,7 @@ const DashboardModule = () =>{
             <div className="flex w-full mx-auto max-w-7xl space-x-4 px-4">
             <div className="flex flex-col grow ">
                 <h1 className="text-2xl md:text-3xl xlg:text-4xl text-white font-bold mb-8">Dashboard</h1>
-                <FinancialTiles currentBalance={currentBalance}/>
+                <FinancialTiles incomeTotal={calculateTransaction(incomeTransactions).toString()} outcomeTotal={calculateTransaction(outComeTransactions).toString()} onFetchCallBack={refreshBackend} currentBalance={currentBalance}/>
                 <FinancialOverview/>
                 <TransactionSection/>
             </div>
