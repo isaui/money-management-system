@@ -2,9 +2,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useSidebar } from "../contexts/SidebarContext";
 import { ISidebarContent } from "./interface/ISidebarContent";
-import { BiCode, BiHome } from "react-icons/bi";
+import { BiHome, BiSearch } from "react-icons/bi";
 import { MdApi, MdDashboard } from "react-icons/md";
-import { RiTeamFill } from "react-icons/ri";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const Sidebar: React.FC = () => {
@@ -32,15 +31,10 @@ const Sidebar: React.FC = () => {
             icon: <MdDashboard title='dashboard' />
         },
         {
-            title: 'Teams',
-            href: '/teams',
-            icon: <RiTeamFill title='teams' />
+            title: 'Search',
+            href: '/search',
+            icon: <BiSearch title='search' />
         },
-        {
-            title: 'API',
-            href: '/developer',
-            icon: <BiCode title="api integrations"/>
-        }
      ];
   
     const handleNavigation = (title: string, path: string) => {

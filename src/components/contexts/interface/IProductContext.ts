@@ -1,4 +1,4 @@
-import { ITransaction } from "@/components/modules/DashboardModule/interface/ITransaction";
+import { ITransaction } from "@/components/contexts/interface/ITransaction";
 
 export interface IProductContext{
     incomeTransactions: ITransaction[]

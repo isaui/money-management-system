@@ -1,4 +1,4 @@
-import { ITransaction } from "./ITransaction"
+import { ITransaction } from "../../../contexts/interface/ITransaction"
 
 export interface ITransactionPopup {
     onCancel: () => void

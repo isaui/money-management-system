@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { ITransaction } from '@/components/modules/DashboardModule/interface/ITransaction';
+import { ITransaction } from '@/components/contexts/interface/ITransaction';
 import { IProductContext } from './interface/IProductContext';
 import { useAuth } from './AuthContext';
 import axios from 'axios';

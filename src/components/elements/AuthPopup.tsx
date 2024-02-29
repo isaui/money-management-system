@@ -12,7 +12,7 @@ import { useAuth } from "../contexts/AuthContext"
 import { IUser } from "../contexts/interface/IUser"
 
 const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCancel,}) => {
-    const {user, signInUser, logoutUser} = useAuth();
+    const {signInUser} = useAuth();
     const [isLoginDisplay, setIsLoginDisplay] = useState<boolean>(isLoginDisplayInit)
     const [profilePhotoDisplay, setProfilePhotoDisplay] = useState<boolean>(false) 
     const [profilePhoto ,setProfilePhoto] = useState<string>('https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png')

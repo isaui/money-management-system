@@ -4,35 +4,56 @@ import ToggleAvatar from "./ToggleAvatar"
 import { IHeader } from "./interface/IHeader"
 import { HiMenu } from "react-icons/hi"
 import { useSidebar } from "../contexts/SidebarContext"
-import { useRef, useState } from "react"
+import {useState } from "react"
 import AuthPopup from "./AuthPopup"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth as useAuthContext } from "../contexts/AuthContext"
+import { useProductContext } from "../contexts/ProductContext"
+import { getAllTransactionsHistory } from "@/utilities/getTransactionsHistory"
+import { IoClose } from "react-icons/io5"
+import { useRouter } from "next/navigation"
 
 const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
-    const {user} = useAuth();
-    const { isSidebarOpen, toggleSidebar, currentPageTitle, setCurrentPageTitle } = useSidebar();
+    const {user} = useAuthContext();
+    const {incomeTransactions, balanceTransactions, outcomeTransactions} = useProductContext();
+    const transactions = getAllTransactionsHistory([...incomeTransactions, ...balanceTransactions, ...outcomeTransactions])
+    const router = useRouter()
+    
+    const {toggleSidebar } = useSidebar();
     const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false)
     const [isMobileSearchOpen, setIsMobileSearchOpen] = useState<boolean>(false)
-
+    const [searchText, setSearchText] = useState<string>('')
+    const searchedTransactions = transactions.filter(transaction => transaction.label != 'Balance' 
+    && transaction.title.toLowerCase().includes(searchText.toLowerCase()))
+    const canShowPrediction = searchedTransactions.length != 0 &&  searchText.trim().length != 0
     const toggleSearchMobile = () => {
         setIsMobileSearchOpen(prev => !prev)
     }
     
     return (
-        <div className="w-full  flex flex-col items-center justify-center ">
+        <div className="w-full pb-2  flex flex-col items-center justify-center ">
             <div className={`md:hidden   flex w-full min-w-[100vw]   bg-slate-900 transform transition-transform duration-300 ease-in-out ${
                     isMobileSearchOpen ? 'translate-y-0 mb-4 p-4 -mt-4' : '-translate-y-28 max-h-0'
             }`}>
-                <div className="mx-auto flex  grow max-w-[54rem]  ">
+               
+                <div className="mx-auto flex flex-col grow max-w-[54rem]  ">
                     <div className="ml-2 w-full flex items-center rounded-full border-2 border-blue-400">
-                        <button className=" text-white font-bold py-2 px-4 rounded-l-full">
+                        <button onClick={()=>{
+                            router.push(`/search?q=${searchText}`)
+                        }} className=" text-white font-bold py-2 px-4 rounded-l-full">
                             <FaSearch />
                         </button>
                         <input
                             className="py-2 px-4 rounded-r-full text-white w-full text-base bg-transparent   focus:outline-none"
                             type="text"
+                            value={searchText}
+                            onChange={(e)=>{setSearchText(e.currentTarget.value)}}
                             placeholder="Cari Pengeluaran atau Pemasukan..."
                         />
+                         <button onClick={()=>{
+                            setSearchText('')
+                         }} className=" text-white font-bold py-2 px-4 rounded-l-full">
+                            <IoClose />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -56,17 +77,39 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
                 }
             
                 {
-                    includeSearchBar && <div className="md:ml-auto hidden md:flex  grow max-w-[54rem]  ">
+                    includeSearchBar && <div className=" relative md:ml-auto hidden md:flex flex-col grow max-w-[54rem] mr-2  ">
                     <div className="ml-2 w-full flex items-center rounded-full border-2 border-blue-400">
-                        <button className=" text-white font-bold py-2 px-4 rounded-l-full">
+                        <button onClick={()=>{
+                            router.push(`/search?q=${searchText}`)
+                        }} className=" text-white font-bold py-2 px-4 rounded-l-full">
                             <FaSearch />
                         </button>
                         <input
                             className="py-2 px-4 rounded-r-full text-white w-full text-base bg-transparent   focus:outline-none"
                             type="text"
+                            value={searchText}
+                            onChange={(e)=>{setSearchText(e.currentTarget.value)}}
                             placeholder="Cari Pengeluaran atau Pemasukan..."
                         />
+                         <button onClick={()=>{
+                            setSearchText('')
+                         }} className=" text-white font-bold py-2 px-4 rounded-l-full">
+                            <IoClose />
+                        </button>
                     </div>
+                    {
+                        canShowPrediction && <div className="absolute z-20 top-12 -right-2 flex flex-col w-full rounded-lg bg-indigo-950  border-2 border-blue-400  mt-4">
+                            {
+                                searchedTransactions.map((transaction)=>{
+                                    return <div onClick={()=>{
+                                        router.push(`/search?q=${transaction.title}`)
+                                    }} key={transaction.id + 'prediction-result'} className="mb-2 px-4 py-2 hover:bg-pink-800 text-white">
+                                        <h1>{transaction.title}</h1>
+                                    </div>
+                                })
+                            }
+                        </div>
+                    }
                 </div>
                 }
                 <div className="md:ml-auto flex items-center">

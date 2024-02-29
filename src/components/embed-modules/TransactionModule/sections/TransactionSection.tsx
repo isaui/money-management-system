@@ -1,12 +1,13 @@
 import Dropdown from "@/components/elements/Dropdown"
-import { ITransaction } from "../interface/ITransaction"
-import TransactionTile from "../module-elements/TransactionTile"
+import { ITransaction } from "../../../contexts/interface/ITransaction"
+import TransactionTile from "../../../modules/DashboardModule/module-elements/TransactionTile"
 import { IDropdownOption } from "@/components/elements/interface/IDropdownOption"
 import MultiSwitch from "@/components/elements/MultiSwitch"
-import { useState } from "react"
-import { ITransactionSection } from "../interface/ITransactionSection"
+import React, { useState } from "react"
 import { useProductContext } from "@/components/contexts/ProductContext"
 import { getTransactionsHistory } from "@/utilities/getTransactionsHistory"
+import { ITransactionSection } from "../interface/ITransactionSection"
+
 
 
 const sortOption: IDropdownOption[] = [
@@ -16,11 +17,13 @@ const sortOption: IDropdownOption[] = [
 const transactionType: string[] = ["Semua","Income","Outcome", "Self Changed Balance"]
 
 
-const TransactionSection = () => {
+const TransactionSection: React.FC<ITransactionSection> = ({desiredOutputMatching, desiredTitle}) => {
 
     const {incomeTransactions, outcomeTransactions, balanceTransactions, fetchDatabase} = useProductContext()
-    const transactions = getTransactionsHistory([...balanceTransactions, ...incomeTransactions,...outcomeTransactions])
-
+    let transactions = getTransactionsHistory([...balanceTransactions, ...incomeTransactions,...outcomeTransactions])
+    if(desiredOutputMatching){
+        transactions = transactions.filter(transaction => transaction.title.trim().toLowerCase().includes(desiredOutputMatching.toLowerCase().trim()))
+    }
     const [selectedTransactionType, setSelectedTransactionType] = useState<string>(transactionType[0])
     const [selectedSortOption, setSelectedSortOption] = useState<IDropdownOption>(sortOption[0])
 
@@ -53,7 +56,7 @@ const TransactionSection = () => {
 
     return <div className="w-full flex flex-col">
         <div className="flex w-full items-center ">
-        <h1 className="text-2xl md:text-3xl xlg:text-4xl text-white font-bold mt-8 mb-4 mr-auto break-words">Transactions</h1>
+        <h1 className="text-2xl md:text-3xl xlg:text-4xl text-white font-bold mt-8 mb-4 mr-auto break-words">{desiredTitle? desiredTitle: 'Transactions'}</h1>
         <div className="ml-2">
             <Dropdown options={sortOption} onSelect={updateSelectedSortOption} initialValue={selectedSortOption}/>
         </div>

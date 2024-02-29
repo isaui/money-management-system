@@ -1,5 +1,5 @@
 import { GroupedTransactions } from "@/components/modules/DashboardModule/interface/IGroupedTransaction";
-import { ITransaction } from "@/components/modules/DashboardModule/interface/ITransaction";
+import { ITransaction } from "@/components/contexts/interface/ITransaction";
 
 export function groupTransactionsByDayAndLabel(transactions: ITransaction[]): GroupedTransactions {
     const groupedTransactions: GroupedTransactions = {};

@@ -10,18 +10,26 @@ import { getAllTransactionsHistory } from "@/utilities/getTransactionsHistory";
 const FinancialOverview = () => {
 
     const {incomeTransactions, outcomeTransactions, balanceTransactions} = useProductContext()
-    const transactions = getAllTransactionsHistory([...incomeTransactions, ...outcomeTransactions, ...balanceTransactions])
-
-    const [currentTransactionDataTable, setCurrentTransactionDataTable] = 
-        useState<GroupedTransactions>(groupTransactionsByMonthAndLabel(transactions))
-
-    const [overviewList, setOverviewList] = useState<IOverviewData[]>([])
-
     const [selectedTimeRange, setSelectedTimeRange] = useState<string>('Bulanan')
-    const getOverviewData  = () => {
+    const transactions = getAllTransactionsHistory([...incomeTransactions, ...outcomeTransactions, ...balanceTransactions])
+    const groupTransactions = (label: string) : GroupedTransactions => {
+        let data: GroupedTransactions = {}
+        if(label == 'Harian'){
+            data = groupTransactionsByDayAndLabel(transactions)
+        }
+        else if(label == 'Mingguan'){
+            data = groupTransactionsByWeekAndLabel(transactions)
+        }
+        else{
+            data = groupTransactionsByMonthAndLabel(transactions)
+        }
+       
+        return data
+    }
+    const getOverviewData  = (groupData: GroupedTransactions) => {
         const updatedOverviewList : IOverviewData[] = []
-        Object.keys(currentTransactionDataTable).forEach((timeKey, index)=>{
-            const labelledData = currentTransactionDataTable[timeKey]
+        Object.keys(groupData).forEach((timeKey, index)=>{
+            const labelledData = groupData[timeKey]
             const data : IOverviewData = {
                 name: timeKey,
                 income: 0,
@@ -43,31 +51,10 @@ const FinancialOverview = () => {
             })
             updatedOverviewList.push(data)
         })
-        setOverviewList(updatedOverviewList)
+        return updatedOverviewList
     }
+    const overviewList = getOverviewData(groupTransactions(selectedTimeRange))
 
-    useEffect(()=>{
-        groupTransactions(selectedTimeRange)
-    },[selectedTimeRange])
-
-    useEffect(()=>{
-        getOverviewData()
-    },[currentTransactionDataTable])
-
-    const groupTransactions = (label: string) => {
-        let data: GroupedTransactions = {}
-        if(label == 'Harian'){
-            data = groupTransactionsByDayAndLabel(transactions)
-        }
-        else if(label == 'Mingguan'){
-            data = groupTransactionsByWeekAndLabel(transactions)
-        }
-        else{
-            data = groupTransactionsByMonthAndLabel(transactions)
-        }
-       
-        setCurrentTransactionDataTable(data)
-    }
     return <div className="flex flex-col w-full">
         <h1 className="text-2xl md:text-3xl xlg:text-4xl text-white font-bold my-8">Overview</h1>
         <LineGraph dropdownValues={['Harian', 'Mingguan', 'Bulanan']} onClickDropdownValue={function (value: string): void {
