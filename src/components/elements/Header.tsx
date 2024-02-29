@@ -69,7 +69,7 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
                 }
 
                 {
-                    includeSearchBar && <div className="md:hidden ml-auto mr-2">
+                    user && includeSearchBar && <div className="md:hidden ml-auto mr-2">
                         <button onClick={toggleSearchMobile} className="bg-pink-700 text-white font-bold flex items-center justify-center p-3 rounded-full">
                             <FaSearch />
                         </button>
@@ -77,7 +77,7 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
                 }
             
                 {
-                    includeSearchBar && <div className=" relative md:ml-auto hidden md:flex flex-col grow max-w-[54rem] mr-2  ">
+                    user && includeSearchBar && <div className=" relative md:ml-auto hidden md:flex flex-col grow max-w-[54rem] mr-2  ">
                     <div className="ml-2 w-full flex items-center rounded-full border-2 border-blue-400">
                         <button onClick={()=>{
                             router.push(`/search?q=${searchText}`)
