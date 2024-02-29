@@ -6,12 +6,20 @@ import IncomePopup from "../module-elements/IncomePopup"
 import OutcomePopup from "../module-elements/OutcomePopup"
 import BalancePopup from "../module-elements/BalancePopup"
 import { IFinancialTiles } from "../interface/IFinancialTiles"
+import { useProductContext } from "@/components/contexts/ProductContext"
+import { calculateTransaction } from "@/utilities/calculateTransaction"
 
 
-const FinancialTiles : React.FC<IFinancialTiles> = ({currentBalance, onFetchCallBack, incomeTotal, outcomeTotal}) => {
+const FinancialTiles = () => {
+
+    const {fetchDatabase, balanceTransactions, incomeTransactions, outcomeTransactions} = useProductContext()
+    
     const [isIncomePopupOpen, setIncomePopupOpen] = useState<boolean>(false)
     const [isOutcomePopupOpen, setOutcomePopupOpen] = useState<boolean>(false)
     const [isBalancePopupOpen, setIsBalancePopupOpen] = useState<boolean>(false)
+    const currentBalance = balanceTransactions.length == 0? '0' : balanceTransactions[0].price
+    const incomeTotal = calculateTransaction(incomeTransactions)
+    const outcomeTotal = calculateTransaction(outcomeTransactions)
 
     const openIncomePopup = () => {
         setIncomePopupOpen(true)
@@ -28,7 +36,7 @@ const FinancialTiles : React.FC<IFinancialTiles> = ({currentBalance, onFetchCall
             }`}>
                 <IncomePopup title="Tambah Income" onCancel={()=>{setIncomePopupOpen(false)}} onSuccess={()=>{
                     setIncomePopupOpen(false)
-                    onFetchCallBack()
+                    fetchDatabase()
                     }}/>
         </div>
         <div className={` fixed z-30 top-1/2  -translate-y-1/2 transform transition-transform duration-300 ease-in-out ${
@@ -36,14 +44,14 @@ const FinancialTiles : React.FC<IFinancialTiles> = ({currentBalance, onFetchCall
             }`}>
                 <OutcomePopup title="Tambah Outcome" onCancel={()=>{setOutcomePopupOpen(false)}} onSuccess={()=>{
                     setOutcomePopupOpen(false)
-                    onFetchCallBack()}}/>
+                    fetchDatabase()}}/>
         </div>
         <div className={` fixed z-30 top-1/2  -translate-y-1/2 transform transition-transform duration-300 ease-in-out ${
                     isBalancePopupOpen ? 'left-1/2 -translate-x-1/2' : 'right-0 translate-x-full'
             }`}>
                 <BalancePopup currentBalance={currentBalance} title="Perbarui Balance" onCancel={()=>{setIsBalancePopupOpen(false)}} onSuccess={()=>{
                     setIsBalancePopupOpen(false)
-                    onFetchCallBack()
+                    fetchDatabase()
                     }}/>
         </div>
         <div className="grid grid-cols-2 xl:grid-cols-3 w-full gap-x-4 gap-y-4">

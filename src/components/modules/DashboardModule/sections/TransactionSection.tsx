@@ -5,6 +5,8 @@ import { IDropdownOption } from "@/components/elements/interface/IDropdownOption
 import MultiSwitch from "@/components/elements/MultiSwitch"
 import { useState } from "react"
 import { ITransactionSection } from "../interface/ITransactionSection"
+import { useProductContext } from "@/components/contexts/ProductContext"
+import { getTransactionsHistory } from "@/utilities/getTransactionsHistory"
 
 
 const sortOption: IDropdownOption[] = [
@@ -14,10 +16,14 @@ const sortOption: IDropdownOption[] = [
 const transactionType: string[] = ["Semua","Income","Outcome", "Self Changed Balance"]
 
 
-const TransactionSection : React.FC<ITransactionSection> = ({transactions, onFetchBack}) => {
+const TransactionSection = () => {
+
+    const {incomeTransactions, outcomeTransactions, balanceTransactions, fetchDatabase} = useProductContext()
+    const transactions = getTransactionsHistory([...balanceTransactions, ...incomeTransactions,...outcomeTransactions])
 
     const [selectedTransactionType, setSelectedTransactionType] = useState<string>(transactionType[0])
     const [selectedSortOption, setSelectedSortOption] = useState<IDropdownOption>(sortOption[0])
+
     const filterTransactionsBasedType = () => {
         if(selectedTransactionType == "Semua"){
             return transactions
@@ -58,9 +64,8 @@ const TransactionSection : React.FC<ITransactionSection> = ({transactions, onFet
         {
             filteredTransactions.length == 0? <div className="flex min-h-64 bg-black opacity-30 rounded-xl w-full items-center justify-center"><h1 className="text-center text-white text-xl">Belum ada transaksi</h1></div>   :
             filteredTransactions.map((transaction, index)=> {
-                return <TransactionTile onFetchBack={onFetchBack} key={`${index}-transaction-tile`} 
+                return <TransactionTile onFetchBack={fetchDatabase} key={`${index}-transaction-tile`} 
                     transaction={transaction} initialShowLess={index==0? false:true}/>
-                
             })
         }
     </div>

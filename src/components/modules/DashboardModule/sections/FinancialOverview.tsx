@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { IOverviewData } from "../interface/IOverviewData";
 import LineGraph from "../module-elements/LineGraph"
-import { IFinancialOverview } from "../interface/IFinancialOverview";
 import { GroupedTransactions } from "../interface/IGroupedTransaction";
 import { groupTransactionsByDayAndLabel, groupTransactionsByMonthAndLabel, groupTransactionsByWeekAndLabel } from "@/utilities/groupedTransaction";
 import { calculateTransaction } from "@/utilities/calculateTransaction";
+import { useProductContext } from "@/components/contexts/ProductContext";
+import { getAllTransactionsHistory } from "@/utilities/getTransactionsHistory";
 
-const FinancialOverview : React.FC<IFinancialOverview> = ({transactions}) => {
+const FinancialOverview = () => {
+
+    const {incomeTransactions, outcomeTransactions, balanceTransactions} = useProductContext()
+    const transactions = getAllTransactionsHistory([...incomeTransactions, ...outcomeTransactions, ...balanceTransactions])
+
     const [currentTransactionDataTable, setCurrentTransactionDataTable] = 
         useState<GroupedTransactions>(groupTransactionsByMonthAndLabel(transactions))
+
     const [overviewList, setOverviewList] = useState<IOverviewData[]>([])
+
     const [selectedTimeRange, setSelectedTimeRange] = useState<string>('Bulanan')
     const getOverviewData  = () => {
         const updatedOverviewList : IOverviewData[] = []
@@ -41,14 +48,13 @@ const FinancialOverview : React.FC<IFinancialOverview> = ({transactions}) => {
 
     useEffect(()=>{
         groupTransactions(selectedTimeRange)
-    },[transactions, selectedTimeRange])
+    },[selectedTimeRange])
 
     useEffect(()=>{
         getOverviewData()
     },[currentTransactionDataTable])
 
     const groupTransactions = (label: string) => {
-        console.log('here')
         let data: GroupedTransactions = {}
         if(label == 'Harian'){
             data = groupTransactionsByDayAndLabel(transactions)
@@ -65,10 +71,9 @@ const FinancialOverview : React.FC<IFinancialOverview> = ({transactions}) => {
     return <div className="flex flex-col w-full">
         <h1 className="text-2xl md:text-3xl xlg:text-4xl text-white font-bold my-8">Overview</h1>
         <LineGraph dropdownValues={['Harian', 'Mingguan', 'Bulanan']} onClickDropdownValue={function (value: string): void {
-            console.log(value)
             setSelectedTimeRange(value)
         } } yAxisLabel={"amount"} lineValues={overviewList} lineLabels={['income', 'outcome', 'balance']} xAxisLabel={"name"} lineColors={['#82ca9d', '#E35335', ' #8884d8']}/>
     </div>
 }
-//#82ca9d hijau, #8884d8 ungu, #E35335 orange
+
 export default FinancialOverview
