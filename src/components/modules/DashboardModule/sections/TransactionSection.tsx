@@ -4,26 +4,8 @@ import TransactionTile from "../module-elements/TransactionTile"
 import { IDropdownOption } from "@/components/elements/interface/IDropdownOption"
 import MultiSwitch from "@/components/elements/MultiSwitch"
 import { useState } from "react"
+import { ITransactionSection } from "../interface/ITransactionSection"
 
-const transactionDummy: ITransaction[] = [
-    {
-        label: 'Income',
-        imageUrl: 'https://static.vecteezy.com/system/resources/thumbnails/033/662/051/small/cartoon-lofi-young-manga-style-girl-while-listening-to-music-in-the-rain-ai-generative-photo.jpg',
-        title: 'Korupsi Makan Siang Gratis',
-        note: 'Haram banget sumpah program gaje',
-        price: '276000',
-        time: new Date('2024-05-05T07:00:00')
-
-    }, 
-    {
-        label: 'Outcome',
-        imageUrl: '',
-        title: 'Megalodon Skuy',
-        note: 'Haram banget sumpah program gaje',
-        price: '276000',
-        time: new Date('2024-05-05T07:00:00')
-    }
-]
 
 const sortOption: IDropdownOption[] = [
     {label: "Terbaru", value: "terbaru"},
@@ -31,9 +13,29 @@ const sortOption: IDropdownOption[] = [
 ]
 const transactionType: string[] = ["Semua","Income","Outcome", "Self Changed Balance"]
 
-const TransactionSection = () => {
+
+const TransactionSection : React.FC<ITransactionSection> = ({transactions, onFetchBack}) => {
+
     const [selectedTransactionType, setSelectedTransactionType] = useState<string>(transactionType[0])
     const [selectedSortOption, setSelectedSortOption] = useState<IDropdownOption>(sortOption[0])
+    const filterTransactionsBasedType = () => {
+        if(selectedTransactionType == "Semua"){
+            return transactions
+        }
+        if(selectedTransactionType == "Self Changed Balance"){
+            return transactions.filter((transaction)=> transaction.label == 'Balance' )
+        }
+        return transactions.filter((transaction)=> transaction.label == selectedTransactionType )
+    }
+    const sortTransactions = (transactions : ITransaction[]) => {
+        const sortedTransactions = [...transactions]
+        if(selectedSortOption.value == "terbaru"){
+            return sortedTransactions
+        }
+        return sortedTransactions.reverse()
+    }
+
+    const filteredTransactions = sortTransactions(filterTransactionsBasedType())
 
     const updateSelectedTransactionType = (value:string)=>{
         setSelectedTransactionType(value)
@@ -42,6 +44,7 @@ const TransactionSection = () => {
     const updateSelectedSortOption = (value: IDropdownOption) => {
         setSelectedSortOption(value)
     }
+
     return <div className="w-full flex flex-col">
         <div className="flex w-full items-center ">
         <h1 className="text-2xl md:text-3xl xlg:text-4xl text-white font-bold mt-8 mb-4 mr-auto break-words">Transactions</h1>
@@ -52,8 +55,14 @@ const TransactionSection = () => {
         <div className="flex w-full mb-4">
             <MultiSwitch onCallback={updateSelectedTransactionType} initialValue={selectedTransactionType} values={transactionType}/>
         </div>
-        <TransactionTile transaction={transactionDummy[0]} initialShowLess={false}/>
-        <TransactionTile transaction={transactionDummy[1]} initialShowLess={true}/>
+        {
+            filteredTransactions.length == 0? <div className="flex min-h-64 bg-black opacity-30 rounded-xl w-full items-center justify-center"><h1 className="text-center text-white text-xl">Belum ada transaksi</h1></div>   :
+            filteredTransactions.map((transaction, index)=> {
+                return <TransactionTile onFetchBack={onFetchBack} key={`${index}-transaction-tile`} 
+                    transaction={transaction} initialShowLess={index==0? false:true}/>
+                
+            })
+        }
     </div>
 }
 

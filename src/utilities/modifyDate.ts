@@ -3,8 +3,8 @@ export const handleDateChange = (currentDate: Date, event: React.ChangeEvent<HTM
     const inputDate = new Date(inputValue);
 
     const updatedDate = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
+      inputDate.getFullYear(),
+      inputDate.getMonth(),
       inputDate.getDate(),
       currentDate.getHours(),
       currentDate.getMinutes(),

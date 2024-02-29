@@ -1,4 +1,5 @@
 export interface ITransaction{
+    id: string
     label: 'Income'|'Outcome'|'Balance'
     title: string
     imageUrl: string
@@ -6,4 +7,6 @@ export interface ITransaction{
     price: string
     time: Date
     isAffectingBalance?: boolean
+    isRelatedToTransaction?: boolean
+    prevTransactionAmount?: string
 }

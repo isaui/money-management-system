@@ -56,6 +56,7 @@ const BalancePopup: React.FC<IBalancePopup> = ({onCancel, onSuccess, title, curr
     }
     const updateBalance = async () => {
         if(validate()){
+            toast("Mengedit balance...")
             const queryString = `
                     UPDATE INCOME
                     SET is_affecting = false WHERE user_id = '${user?.userId}';
@@ -69,6 +70,7 @@ const BalancePopup: React.FC<IBalancePopup> = ({onCancel, onSuccess, title, curr
             await axios.post('/api/query',{
                 queryString: queryString
             })
+            toast("Berhasil mengedit balance...")
             onSuccess()
         }
         

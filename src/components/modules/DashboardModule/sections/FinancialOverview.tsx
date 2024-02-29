@@ -1,21 +1,74 @@
+import React, { useEffect, useState } from "react";
 import { IOverviewData } from "../interface/IOverviewData";
 import LineGraph from "../module-elements/LineGraph"
+import { IFinancialOverview } from "../interface/IFinancialOverview";
+import { GroupedTransactions } from "../interface/IGroupedTransaction";
+import { groupTransactionsByDayAndLabel, groupTransactionsByMonthAndLabel, groupTransactionsByWeekAndLabel } from "@/utilities/groupedTransaction";
+import { calculateTransaction } from "@/utilities/calculateTransaction";
 
-const data: IOverviewData[] = [
-    { name: 'Jan', income: 4000, outcome: 2000, balance:500 },
-    { name: 'Feb', income: 3000, outcome: 1500,  balance:1100 },
-    { name: 'Mar', income: 5000, outcome: 3000,  balance:1200 },
-    { name: 'Apr', income: 4500, outcome: 3500,  balance:1600 },
-    { name: 'May', income: 6000, outcome: 4000,  balance:1700 },
-    { name: 'Jun', income: 8000, outcome: 6000,  balance:1900 },
-  ];
-const FinancialOverview = () => {
+const FinancialOverview : React.FC<IFinancialOverview> = ({transactions}) => {
+    const [currentTransactionDataTable, setCurrentTransactionDataTable] = 
+        useState<GroupedTransactions>(groupTransactionsByMonthAndLabel(transactions))
+    const [overviewList, setOverviewList] = useState<IOverviewData[]>([])
+    const [selectedTimeRange, setSelectedTimeRange] = useState<string>('Bulanan')
+    const getOverviewData  = () => {
+        const updatedOverviewList : IOverviewData[] = []
+        Object.keys(currentTransactionDataTable).forEach((timeKey, index)=>{
+            const labelledData = currentTransactionDataTable[timeKey]
+            const data : IOverviewData = {
+                name: timeKey,
+                income: 0,
+                outcome: 0,
+                balance: 0
+            }
+            Object.keys(labelledData).forEach((label,index)=>{
+                const transactionList = labelledData[label]
+                const amount = calculateTransaction(transactionList)
+                if(label.toLowerCase() == 'income'){
+                    data.income = amount
+                }
+                else if(label.toLowerCase() == 'outcome'){
+                    data.outcome = amount
+                }
+                else{
+                    data.balance = amount
+                }
+            })
+            updatedOverviewList.push(data)
+        })
+        setOverviewList(updatedOverviewList)
+    }
+
+    useEffect(()=>{
+        groupTransactions(selectedTimeRange)
+    },[transactions, selectedTimeRange])
+
+    useEffect(()=>{
+        getOverviewData()
+    },[currentTransactionDataTable])
+
+    const groupTransactions = (label: string) => {
+        console.log('here')
+        let data: GroupedTransactions = {}
+        if(label == 'Harian'){
+            data = groupTransactionsByDayAndLabel(transactions)
+        }
+        else if(label == 'Mingguan'){
+            data = groupTransactionsByWeekAndLabel(transactions)
+        }
+        else{
+            data = groupTransactionsByMonthAndLabel(transactions)
+        }
+       
+        setCurrentTransactionDataTable(data)
+    }
     return <div className="flex flex-col w-full">
         <h1 className="text-2xl md:text-3xl xlg:text-4xl text-white font-bold my-8">Overview</h1>
         <LineGraph dropdownValues={['Harian', 'Mingguan', 'Bulanan']} onClickDropdownValue={function (value: string): void {
-            
-        } } yAxisLabel={"amount"} lineValues={data} lineLabels={['income', 'outcome', 'balance']} xAxisLabel={"name"} lineColors={['#8884d8', '#82ca9d', '#E35335']}/>
+            console.log(value)
+            setSelectedTimeRange(value)
+        } } yAxisLabel={"amount"} lineValues={overviewList} lineLabels={['income', 'outcome', 'balance']} xAxisLabel={"name"} lineColors={['#82ca9d', '#E35335', ' #8884d8']}/>
     </div>
 }
-
+//#82ca9d hijau, #8884d8 ungu, #E35335 orange
 export default FinancialOverview

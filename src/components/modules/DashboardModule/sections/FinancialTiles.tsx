@@ -1,4 +1,3 @@
-import DeletePopup from "@/components/elements/DeletePopup"
 import Stack from "@/components/elements/Stack"
 import { useState } from "react"
 import { GiPayMoney, GiReceiveMoney } from "react-icons/gi"
@@ -6,9 +5,7 @@ import { GrMoney } from "react-icons/gr"
 import IncomePopup from "../module-elements/IncomePopup"
 import OutcomePopup from "../module-elements/OutcomePopup"
 import BalancePopup from "../module-elements/BalancePopup"
-import { IBalance } from "../interface/IBalance"
 import { IFinancialTiles } from "../interface/IFinancialTiles"
-import {calculateTransaction } from "@/utilities/calculateTransaction"
 
 
 const FinancialTiles : React.FC<IFinancialTiles> = ({currentBalance, onFetchCallBack, incomeTotal, outcomeTotal}) => {
@@ -44,7 +41,7 @@ const FinancialTiles : React.FC<IFinancialTiles> = ({currentBalance, onFetchCall
         <div className={` fixed z-30 top-1/2  -translate-y-1/2 transform transition-transform duration-300 ease-in-out ${
                     isBalancePopupOpen ? 'left-1/2 -translate-x-1/2' : 'right-0 translate-x-full'
             }`}>
-                <BalancePopup currentBalance={currentBalance? currentBalance.amount : '-'} title="Perbarui Balance" onCancel={()=>{setIsBalancePopupOpen(false)}} onSuccess={()=>{
+                <BalancePopup currentBalance={currentBalance} title="Perbarui Balance" onCancel={()=>{setIsBalancePopupOpen(false)}} onSuccess={()=>{
                     setIsBalancePopupOpen(false)
                     onFetchCallBack()
                     }}/>
@@ -63,7 +60,7 @@ const FinancialTiles : React.FC<IFinancialTiles> = ({currentBalance, onFetchCall
                 </div>
             </div>
             <div className="ml-0">
-                <h1 className="text-center text-2xl md:text-4xl font-bold">{currentBalance == null? '-' : 'Rp' + currentBalance.amount}</h1>
+                <h1 className="text-center text-2xl md:text-4xl font-bold">{'Rp'+currentBalance}</h1>
             </div>
             </div>
             <div className="w-full h-full shine overflow-hidden"></div>

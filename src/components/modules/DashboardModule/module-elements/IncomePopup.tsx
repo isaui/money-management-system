@@ -40,7 +40,7 @@ const IncomePopup: React.FC<ITransactionPopup> = ({onCancel, onSuccess, title, t
             if(transaction.imageUrl){
                 setImage(transaction.imageUrl)
             }
-            setTransactionTime(transaction.time)
+            setTransactionTime(new Date(transaction.time.getTime() + (7 * 60 * 60 * 1000)))
         }
         else{
             incomeTitleRef.current = ''
@@ -90,18 +90,27 @@ const IncomePopup: React.FC<ITransactionPopup> = ({onCancel, onSuccess, title, t
                 `
                 DO $$
                 DECLARE 
-                    new_balance BIGINT;
+                    prev_balance BIGINT;
+                    prev_balance_id BIGINT;
+                    current_balance_id BIGINT;
                 BEGIN
                     -- Mendapatkan balance terbaru
-                    SELECT amount INTO new_balance FROM balance WHERE user_id = '${user?.userId}' ORDER BY transaction_time DESC LIMIT 1 FOR UPDATE;
-                    
-                    -- Menambahkan income baru
-                    INSERT INTO income (user_id, income_name, income_thumbnail, income_amount, income_information, transaction_time, is_affecting)
-                    VALUES ('${user?.userId}', '${incomeTitleRef.current}', '${image}', ${incomeAmountRef.current}, '${incomeNoteRef.current}', '${transactionTime.toISOString()}', ${agreed});
+                    SELECT amount, balance_id INTO prev_balance, prev_balance_id FROM balance WHERE user_id = '${user?.userId}' ORDER BY balance_id DESC LIMIT 1 FOR UPDATE;
                     
                     -- Menambahkan balance baru
                     INSERT INTO balance (user_id, amount, transaction_time)
-                    VALUES ('${user?.userId}', new_balance + ${incomeAmountRef.current}, '${transactionTime.toISOString()}');
+                    VALUES ('${user?.userId}', prev_balance + ${incomeAmountRef.current}, '${transactionTime.toISOString()}')
+                    RETURNING balance_id INTO current_balance_id;
+
+                    INSERT INTO BALANCE_CHAIN(prev_balance_id, next_balance_id) VALUES (
+                        prev_balance_id, current_balance_id
+                    );
+
+                    -- Menambahkan income baru
+                    INSERT INTO INCOME (prev_balance_id, current_balance_id, user_id, income_name, income_thumbnail, income_amount, income_information, transaction_time, is_affecting)
+                    VALUES (prev_balance_id, current_balance_id,'${user?.userId}', '${incomeTitleRef.current}', '${image}', ${incomeAmountRef.current}, '${incomeNoteRef.current}', '${transactionTime.toISOString()}', ${agreed});
+                    
+                    
                 END;
                 $$;
                 `
@@ -110,7 +119,42 @@ const IncomePopup: React.FC<ITransactionPopup> = ({onCancel, onSuccess, title, t
             }
             else{
                 toast('Memperbarui Income...')
-                
+                const queryString =
+                `
+                DO $$
+                DECLARE
+                prev_amount BIGINT;
+                new_amount BIGINT;
+                BEGIN
+
+                    SELECT income_amount into prev_amount FROM INCOME WHERE income_id = '${transaction.id}' LIMIT 1;
+
+                    UPDATE INCOME SET income_name = '${incomeTitleRef.current}' ,
+                    income_thumbnail = '${image}' , income_amount = '${incomeAmountRef.current}' ,
+                    income_information = '${incomeNoteRef.current}' , transaction_time = '${transactionTime.toISOString()}'
+                    WHERE income_id = '${transaction.id}' RETURNING income_amount INTO new_amount;
+
+                    WITH RECURSIVE BalanceChain AS (
+                        SELECT prev_balance_id, next_balance_id
+                        FROM BALANCE_CHAIN
+                        WHERE prev_balance_id = (
+                            SELECT prev_balance_id
+                            FROM INCOME
+                            WHERE income_id = '${transaction.id}'
+                        )
+                        UNION ALL
+                        SELECT bc.prev_balance_id, bc.next_balance_id
+                        FROM BALANCE_CHAIN bc
+                        JOIN BalanceChain ic ON bc.prev_balance_id = ic.next_balance_id
+                    )
+                    UPDATE BALANCE AS b
+                    SET amount = b.amount + new_amount - prev_amount
+                    WHERE balance_id IN (SELECT next_balance_id FROM BalanceChain);           
+                END;
+                $$;
+                `                
+                await axios.post('/api/query', {queryString:queryString})
+                toast('Berhasil memperbarui income')
             }
             onSuccess()
         }

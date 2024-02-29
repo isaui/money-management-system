@@ -1,14 +1,9 @@
 export function parseDateToWIB(date: Date): string {
-    const options: Intl.DateTimeFormatOptions = {
-        timeZone: 'Asia/Jakarta',
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    };
-
-    const formatter = new Intl.DateTimeFormat('id-ID', options);
-    return formatter.format(date);
+    const newDate = new Date(date.getTime() + (7 * 60 * 60 * 1000))
+    const hours = newDate.getHours().toString().padStart(2,'0')
+    const minutes = newDate.getMinutes().toString().padStart(2,'0')
+    const dayOfMonth = newDate.getDate().toString().padStart(2,'0')
+    const month = (newDate.getMonth() + 1).toString().padStart(2, '0')
+    const year = newDate.getFullYear()
+    return `${hours}:${minutes}, ${dayOfMonth}-${month}-${year}`
 }

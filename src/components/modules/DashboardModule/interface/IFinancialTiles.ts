@@ -1,7 +1,5 @@
-import { IBalance } from "./IBalance";
-
 export interface IFinancialTiles {
-    currentBalance:IBalance|null
+    currentBalance: string
     incomeTotal: string 
     outcomeTotal: string
     onFetchCallBack: () => void
