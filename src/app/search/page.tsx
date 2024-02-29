@@ -1,5 +1,6 @@
 import SearchModule from "@/components/modules/SearchModule";
+import { Suspense } from "react";
 
 export default function SearchPage (){
-    return <SearchModule/>
+    return <Suspense><SearchModule/></Suspense>
 }
