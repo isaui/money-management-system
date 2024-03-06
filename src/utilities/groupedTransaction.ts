@@ -15,7 +15,15 @@ export function groupTransactionsByDayAndLabel(transactions: ITransaction[]): Gr
             groupedTransactions[dateKey][label] = [];
         }
 
-        groupedTransactions[dateKey][label].push(transaction);
+        if(groupedTransactions[dateKey][label].length >= 1){
+            groupedTransactions[dateKey][label].push(transaction);
+            groupedTransactions[dateKey][label].sort((first,second)=>{
+                return second.time.getTime() - first.time.getTime()})
+            groupedTransactions[dateKey][label] = [groupedTransactions[dateKey][label].at(0)!]
+        }
+        else{
+            groupedTransactions[dateKey][label].push(transaction);
+        }
     });
 
     return groupedTransactions;
@@ -45,7 +53,16 @@ export function groupTransactionsByMonthAndLabel(transactions: ITransaction[]): 
             groupedTransactions[key][label] = [];
         }
 
-        groupedTransactions[key][label].push(transaction);
+        if(groupedTransactions[key][label].length >= 1){
+            groupedTransactions[key][label].push(transaction);
+            groupedTransactions[key][label].sort((first,second)=>{
+                return second.time.getTime() - first.time.getTime()})
+            groupedTransactions[key][label] = [groupedTransactions[key][label].at(0)!]
+        }
+        else{
+            groupedTransactions[key][label].push(transaction);
+        }
+        
     });
 
     return groupedTransactions;
@@ -75,8 +92,15 @@ export function groupTransactionsByWeekAndLabel(transactions: ITransaction[]): G
         if (!groupedTransactions[key][label]) {
             groupedTransactions[key][label] = [];
         }
-
-        groupedTransactions[key][label].push(transaction);
+        if(groupedTransactions[key][label].length >= 1){
+            groupedTransactions[key][label].push(transaction);
+            groupedTransactions[key][label].sort((first,second)=>{
+                return second.time.getTime() - first.time.getTime()})
+            groupedTransactions[key][label] = [groupedTransactions[key][label].at(0)!]
+        }
+        else{
+            groupedTransactions[key][label].push(transaction);
+        }
     });
 
     return groupedTransactions;
