@@ -138,7 +138,7 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
                     <div className="ml-2">
                         {!user? <button onClick={()=>{
                             setIsAuthOpen(true)
-                        }} className="px-4 py-2 auth-popup-btn text-sm font-bold rounded-md">LOGIN</button>: <ToggleAvatar 
+                        }} className="px-4 py-2 auth-popup-btn text-sm font-bold rounded-md">Sign In</button>: <ToggleAvatar 
                         src={user.profilePicture} alt={"profile"} 
                         isOpen={isMenuOpen} 
                         onToggle={()=>{
