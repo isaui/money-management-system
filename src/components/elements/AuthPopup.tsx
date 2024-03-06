@@ -25,6 +25,10 @@ const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCance
     const profileRef = useRef<HTMLInputElement>(null);
     const popupRef = useRef<HTMLDivElement>(null)
 
+    useEffect(()=>{
+        setIsLoginDisplay(isLoginDisplayInit)
+    },[isLoginDisplayInit])
+
     const [render, setRender] = useState<boolean>(false)
 
     const renderLayer = () => {
