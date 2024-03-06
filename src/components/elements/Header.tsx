@@ -17,8 +17,8 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
     const {incomeTransactions, balanceTransactions, outcomeTransactions} = useProductContext();
     const transactions = getAllTransactionsHistory([...incomeTransactions, ...balanceTransactions, ...outcomeTransactions])
     const router = useRouter()
-    
     const {toggleSidebar } = useSidebar();
+    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
     const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false)
     const [isMobileSearchOpen, setIsMobileSearchOpen] = useState<boolean>(false)
     const [searchText, setSearchText] = useState<string>('')
@@ -119,9 +119,9 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
                             setIsAuthOpen(true)
                         }} className="px-4 py-2 auth-popup-btn text-sm font-bold rounded-md">LOGIN</button>: <ToggleAvatar 
                         src={user.profilePicture} alt={"profile"} 
-                        isOpen={false} 
+                        isOpen={isMenuOpen} 
                         onToggle={()=>{
-                            
+                            setIsMenuOpen(prev => !prev)
                         }}  />}
                     </div>
                 </div>
