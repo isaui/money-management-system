@@ -11,6 +11,7 @@ import { useProductContext } from "../contexts/ProductContext"
 import { getAllTransactionsHistory } from "@/utilities/getTransactionsHistory"
 import { IoClose } from "react-icons/io5"
 import { useRouter } from "next/navigation"
+import LoadingButton from "./LoadingButton"
 
 const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
     const {user} = useAuthContext();
@@ -24,6 +25,7 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
     const [searchText, setSearchText] = useState<string>('')
     const searchedTransactions = transactions.filter(transaction => transaction.label != 'Balance' 
     && transaction.title.toLowerCase().includes(searchText.toLowerCase()))
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const canShowPrediction = searchedTransactions.length != 0 &&  searchText.trim().length != 0
     const toggleSearchMobile = () => {
         setIsMobileSearchOpen(prev => !prev)
@@ -31,9 +33,13 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
     
     return (
         <div className="w-full pb-2  flex flex-col items-center justify-center ">
+            {
+                isLoading && <LoadingButton/>
+            }
             <div className={`md:hidden   flex w-full min-w-[100vw]   bg-slate-900 transform transition-transform duration-300 ease-in-out ${
                     isMobileSearchOpen ? 'translate-y-0 mb-4 p-4 -mt-4' : '-translate-y-28 max-h-0'
             }`}>
+            
                
                 <div className="mx-auto flex flex-col grow max-w-[54rem]  ">
                     <div className="ml-2 w-full flex items-center rounded-full border-2 border-blue-400">
@@ -129,11 +135,16 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
             <div className={` fixed z-30 top-1/2  -translate-y-1/2 transform transition-transform duration-300 ease-in-out ${
                     isAuthOpen ? 'left-1/2 -translate-x-1/2' : 'right-0 translate-x-full'
             }`}>
-                <AuthPopup isLoginDisplayInit={true} onSubmit={function (): void {
+                <AuthPopup onFinish={()=>{
+                    setIsLoading(false)
+                }} isLoginDisplayInit={true} onSubmit={function (): void {
                     setIsAuthOpen(false)
+                    setIsLoading(true)
                 } } onCancel={function (): void {
                     setIsAuthOpen(false)
-                } }/>
+                } }
+                    
+                />
             </div>
             
                 

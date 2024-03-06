@@ -11,7 +11,7 @@ import { toast } from "react-toastify"
 import { useAuth } from "../contexts/AuthContext"
 import { IUser } from "../contexts/interface/IUser"
 
-const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCancel,}) => {
+const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCancel, onFinish}) => {
     const {signInUser} = useAuth();
     const [isLoginDisplay, setIsLoginDisplay] = useState<boolean>(isLoginDisplayInit)
     const [profilePhotoDisplay, setProfilePhotoDisplay] = useState<boolean>(false) 
@@ -151,6 +151,7 @@ const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCance
             }
             toast("Anda berhasil masuk sebagai "+ nwUser.fullname)
             signInUser(nwUser)
+            onFinish()
             
         }
     }
@@ -172,10 +173,12 @@ const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCance
                 }
                 toast("Anda berhasil masuk sebagai "+ nwUser.fullname)
                 signInUser(nwUser)
+                onFinish()
                 
             }
         }catch(err:any){
             toast.error(err)
+            onFinish()
         }
     }
     const toLoginDisplay = () =>{

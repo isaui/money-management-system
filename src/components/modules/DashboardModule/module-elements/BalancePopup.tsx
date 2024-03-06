@@ -17,6 +17,7 @@ const BalancePopup: React.FC<IBalancePopup> = ({onCancel, onSuccess, title, curr
     const balancePreviousAmountRef = useRef<string>(currentBalance)
     const balanceAfterAmountRef = useRef<string>('')
     const [render, setRender] = useState<boolean>(false)
+    
 
     const renderLayer = () => {
         setRender(prevState => !prevState);
