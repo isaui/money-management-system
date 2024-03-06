@@ -22,8 +22,8 @@ const SearchModule = () => {
                <div className="flex flex-col w-full max-w-7xl mx-auto">
                 {user? <div className="flex mx-auto w-full max-w-7xl flex-col">
                 {
-                    searchString && <div className="flex w-full text-white mb-2">
-                        <h1>Hasil pencarian untuk <span className="text-blue-500">{searchString}</span></h1>
+                    searchString && <div className="flex w-full text-lg md:text-2xl font-bold text-white mb-2">
+                        <h1>Kamu mencari <span className="text-blue-500">{searchString}</span></h1>
                     </div>
                 }
                <TransactionSection desiredOutputMatching={searchString? searchString : undefined}

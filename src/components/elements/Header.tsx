@@ -30,6 +30,15 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
     const toggleSearchMobile = () => {
         setIsMobileSearchOpen(prev => !prev)
     }
+
+    const handleKeyDown = (e:any) => {
+        if (e.key === "Enter") {
+          handleSearch();
+        }
+      };
+    const handleSearch = () => {
+        router.push(`/search?q=${searchText}`)
+    }
     
     return (
         <div className="w-full pb-2  flex flex-col items-center justify-center ">
@@ -44,22 +53,25 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
                 <div className="mx-auto flex flex-col grow max-w-[54rem]  ">
                     <div className="ml-2 w-full flex items-center rounded-full border-2 border-blue-400">
                         <button onClick={()=>{
-                            router.push(`/search?q=${searchText}`)
+                            handleSearch()
                         }} className=" text-white font-bold py-2 px-4 rounded-l-full">
                             <FaSearch />
                         </button>
                         <input
+                            onKeyDown={handleKeyDown}
                             className="py-2 px-4 rounded-r-full text-white w-full text-base bg-transparent   focus:outline-none"
                             type="text"
                             value={searchText}
                             onChange={(e)=>{setSearchText(e.currentTarget.value)}}
                             placeholder="Cari Pengeluaran atau Pemasukan..."
                         />
-                         <button onClick={()=>{
-                            setSearchText('')
-                         }} className=" text-white font-bold py-2 px-4 rounded-l-full">
-                            <IoClose />
-                        </button>
+                         {
+                            searchText.length != 0 && <button onClick={()=>{
+                                setSearchText('')
+                             }} className=" text-white font-bold py-2 px-4 rounded-l-full">
+                                <IoClose />
+                            </button>
+                         }
                     </div>
                 </div>
             </div>
@@ -86,22 +98,25 @@ const Header: React.FC<IHeader> = ({includeSearchBar, includeSidebarMenu}) => {
                     user && includeSearchBar && <div className=" relative md:ml-auto hidden md:flex flex-col grow max-w-[54rem] mr-2  ">
                     <div className="ml-2 w-full flex items-center rounded-full border-2 border-blue-400">
                         <button onClick={()=>{
-                            router.push(`/search?q=${searchText}`)
+                            handleSearch()
                         }} className=" text-white font-bold py-2 px-4 rounded-l-full">
                             <FaSearch />
                         </button>
                         <input
+                            onKeyDown={handleKeyDown}
                             className="py-2 px-4 rounded-r-full text-white w-full text-base bg-transparent   focus:outline-none"
                             type="text"
                             value={searchText}
                             onChange={(e)=>{setSearchText(e.currentTarget.value)}}
                             placeholder="Cari Pengeluaran atau Pemasukan..."
                         />
-                         <button onClick={()=>{
-                            setSearchText('')
-                         }} className=" text-white font-bold py-2 px-4 rounded-l-full">
-                            <IoClose />
-                        </button>
+                         {
+                            searchText.length != 0 && <button onClick={()=>{
+                                setSearchText('')
+                             }} className=" text-white font-bold py-2 px-4 rounded-l-full">
+                                <IoClose />
+                            </button>
+                         }
                     </div>
                     {
                         canShowPrediction && <div className="absolute z-20 top-12 -right-2 flex flex-col w-full rounded-lg bg-indigo-950  border-2 border-blue-400  mt-4">
