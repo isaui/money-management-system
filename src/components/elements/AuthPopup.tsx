@@ -127,6 +127,7 @@ const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCance
         if(validateRegister()){
             //username, fullname, password, passwordConfirmation, profilePicture
             toast("Sedang membuat akun untuk Anda...")
+            onSubmit()
             await axios.post("/api/register",{
                 username:registerUsername.current,
                 password:registerPassword.current,
@@ -146,7 +147,7 @@ const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCance
             }
             toast("Anda berhasil masuk sebagai "+ nwUser.fullname)
             signInUser(nwUser)
-            onSubmit()
+            
         }
     }
 
@@ -154,6 +155,7 @@ const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCance
         try{
             if(validateLogin()){
                 toast("sedang mengautentikasi...")
+                onSubmit()
                 const res =await axios.post("api/login", {
                     username:username.current, password:password.current
                 })
@@ -166,7 +168,7 @@ const AuthPopup : React.FC<IAuthPopup> = ({isLoginDisplayInit, onSubmit ,onCance
                 }
                 toast("Anda berhasil masuk sebagai "+ nwUser.fullname)
                 signInUser(nwUser)
-                onSubmit()
+                
             }
         }catch(err:any){
             toast.error(err)
